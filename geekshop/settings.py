@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'mainapp',
+    'authapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -71,6 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'geekshop.wsgi.application'
 
+AUTH_USER_MODEL = 'authapp.ShopUser'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
