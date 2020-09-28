@@ -1,29 +1,17 @@
-from django.conf import settings
 from django.shortcuts import render
-import json
-import os
+
+from mainapp.models import Product, ProductCategory
 
 
 def main(request):
     title = 'продукты'
-    context = {
-        'title': title
-    }
+    products = Product.objects.all()[:3]
+    context = {'title': title, 'products': products}
     return render(request, 'mainapp/index.html', context)
 
 
-def products(request):
-    try:
-        with open(os.path.join(settings.BASE_DIR, "links_menu.json")) as json_file:
-            links_menu = json.load(json_file)
-    except IOError:
-        links_menu = [
-            {'href': 'products_all', 'name': 'все'},
-            {'href': 'products_home', 'name': 'дом'},
-            {'href': 'products_office', 'name': 'офис'},
-            {'href': 'products_modern', 'name': 'модерн'},
-            {'href': 'products_classic', 'name': 'классика'},
-        ]
+def products(request, pk=None):
+    links_menu = ProductCategory.objects.all()
     title = 'продукты'
     context = {
         'title': title,
