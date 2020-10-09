@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from authapp.models import ShopUser
+from basketapp.models import Basket
 from mainapp.models import ProductCategory, Product, Contact
 
 FILE_PATH = os.path.join(settings.BASE_DIR, 'mainapp/json')
@@ -17,6 +18,9 @@ def load_from_json(file_name):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+
+        Basket.objects.all().delete()
+
         categories = load_from_json('categories')
 
         ProductCategory.objects.all().delete()
