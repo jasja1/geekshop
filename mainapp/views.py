@@ -14,13 +14,13 @@ def get_basket(user):
 
 
 def get_hot_product():
-    products = Product.objects.all()
+    products = Product.objects.filter(is_active=True)
 
     return sample(list(products), 1)[0]
 
 
 def get_same_products(hot_product):
-    same_products = Product.objects.filter(category=hot_product.category). \
+    same_products = Product.objects.filter(category=hot_product.category, is_active=True). \
                         exclude(pk=hot_product.pk)[:3]
 
     return same_products
@@ -28,7 +28,7 @@ def get_same_products(hot_product):
 
 def main(request):
     title = 'главная'
-    products = Product.objects.all()[:3]
+    products = Product.objects.filter(is_active=True)[:3]
     context = {
         'title': title,
         'products': products,
@@ -38,15 +38,15 @@ def main(request):
 
 def products(request, pk=None):
     title = 'продукты'
-    links_menu = ProductCategory.objects.all()
+    links_menu = ProductCategory.objects.filter(is_active=True)
 
     if pk is not None:
         if pk == 0:
-            products = Product.objects.all().order_by('price')
+            products = Product.objects.filter(is_active=True).order_by('price')
             category = {'name': 'все'}
         else:
             category = get_object_or_404(ProductCategory, pk=pk)
-            products = Product.objects.filter(category__pk=pk).order_by('-price')
+            products = Product.objects.filter(category__pk=pk, is_active=True).order_by('-price')
 
         context = {
             'title': title,
