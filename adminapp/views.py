@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 from adminapp.forms import ProductCategoryEditForm, ProductEditForm
 from django.shortcuts import get_object_or_404, render
@@ -25,6 +27,23 @@ def user_create(request):
     content = {'title': title, 'update_form': user_form}
 
     return render(request, 'adminapp/user_update.html', content)
+
+
+class UsersListView(ListView):
+    model = ShopUser
+    template_name = 'adminapp/users.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'админка / пользователи'
+        return context
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-is_active', '-is_superuser', '-is_staff', 'username')
+
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -78,6 +97,18 @@ def user_delete(request, pk):
     return render(request, 'adminapp/user_delete.html', content)
 
 
+class ProductCategoryCreateView(CreateView):
+    model = ProductCategory
+    template_name = 'adminapp/category_update.html'
+    success_url = reverse_lazy('admin:categories')
+    # fields = '__all__'
+    form_class = ProductCategoryEditForm
+
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def category_create(request):
     title = 'категория / создание'
@@ -109,6 +140,18 @@ def categories(request):
     return render(request, 'adminapp/categories.html', content)
 
 
+class ProductCategoryUpdateView(UpdateView):
+    model = ProductCategory
+    template_name = 'adminapp/category_update.html'
+    success_url = reverse_lazy('admin:categories')
+    # fields = '__all__'
+    form_class = ProductCategoryEditForm
+
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def category_update(request, pk):
     title = 'категория / редактирование'
@@ -126,6 +169,23 @@ def category_update(request, pk):
     content = {'title': title, 'update_form': category_form}
 
     return render(request, 'adminapp/category_update.html', content)
+
+
+class ProductCategoryDeleteView(DeleteView):
+    model = ProductCategory
+    template_name = 'adminapp/category_delete.html'
+    success_url = reverse_lazy('admin:categories')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.is_active = False
+        self.object.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -180,6 +240,15 @@ def products(request, pk):
     }
 
     return render(request, 'adminapp/products.html', content)
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'adminapp/product.html'
+
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 @user_passes_test(lambda u: u.is_superuser)
